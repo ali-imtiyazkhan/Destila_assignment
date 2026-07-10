@@ -31,7 +31,11 @@ function groupByDate(exceptions: ExceptionItem[]) {
   )
 }
 
-export default function ExceptionList() {
+interface Props {
+  onToast?: (text: string, type?: "success" | "error") => void
+}
+
+export default function ExceptionList({ onToast }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const {
     exceptions,
@@ -131,6 +135,7 @@ export default function ExceptionList() {
           id={selectedId}
           onClose={() => setSelectedId(null)}
           onStatusChange={handleStatusChange}
+          onToast={onToast}
         />
       )}
     </div>

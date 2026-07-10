@@ -10,12 +10,14 @@ interface Props {
   id: number
   onClose: () => void
   onStatusChange: (id: number, status: string) => void
+  onToast?: (text: string, type?: "success" | "error") => void
 }
 
 export default function ExceptionDetail({
   id,
   onClose,
   onStatusChange,
+  onToast,
 }: Props) {
   const [detail, setDetail] = useState<ExceptionDetailType | null>(null)
   const [loading, setLoading] = useState(true)
@@ -32,6 +34,7 @@ export default function ExceptionDetail({
     await updateExceptionStatus(id, status)
     onStatusChange(id, status)
     setDetail((prev) => (prev ? { ...prev, status: status as any } : prev))
+    onToast?.(`${detail?.product_code} marked as ${status}`, "success")
   }
 
   if (loading) {

@@ -1,11 +1,13 @@
 import Header from "./components/Header"
 import ExceptionList from "./components/ExceptionList"
 import SummaryCards from "./components/SummaryCards"
+import Toast, { useToasts } from "./components/Toast"
 import { useDarkMode } from "./hooks/useDarkMode"
 import "./App.css"
 
 function App() {
   const { dark, toggle } = useDarkMode()
+  const { toasts, show } = useToasts()
 
   return (
     <div className="app">
@@ -22,7 +24,7 @@ function App() {
           </p>
           <SummaryCards />
           <div style={{ marginTop: "1.5rem" }}>
-            <ExceptionList />
+            <ExceptionList onToast={show} />
           </div>
         </div>
       </main>
@@ -31,6 +33,7 @@ function App() {
           Mini Exception Inbox &mdash; Intern Assignment
         </div>
       </footer>
+      <Toast toasts={toasts} />
     </div>
   )
 }
