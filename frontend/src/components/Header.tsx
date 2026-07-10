@@ -1,4 +1,9 @@
-export default function Header() {
+interface Props {
+  dark: boolean
+  onToggleDark: () => void
+}
+
+export default function Header({ dark, onToggleDark }: Props) {
   return (
     <header className="site-header">
       <div className="container">
@@ -6,6 +11,9 @@ export default function Header() {
           Exception<span>Inbox</span>
         </div>
         <div className="header-actions">
+          <button className="theme-toggle" onClick={onToggleDark} title="Toggle theme">
+            {dark ? "☀️" : "🌙"}
+          </button>
           <a
             href="http://localhost:8000/docs"
             target="_blank"

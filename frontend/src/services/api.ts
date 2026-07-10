@@ -38,6 +38,22 @@ export async function updateExceptionStatus(
   if (!res.ok) throw new Error(`Failed to update status: ${res.status}`)
 }
 
+export interface SummaryData {
+  total: number
+  high: number
+  medium: number
+  open: number
+  acknowledged: number
+  resolved: number
+  avg_deficit_pct: number
+}
+
+export async function fetchSummary(): Promise<SummaryData> {
+  const res = await fetch(`${BASE}/exceptions/summary`)
+  if (!res.ok) throw new Error(`Failed to fetch summary: ${res.status}`)
+  return res.json()
+}
+
 export async function fetchProducts(): Promise<string[]> {
   const res = await fetch(`${BASE}/products`)
   if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`)

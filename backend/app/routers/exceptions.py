@@ -1,12 +1,12 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Exception as ExceptionModel, CleanPlan, CleanActual
-from app.schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse
+from app.schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse, SummaryOut
 
 router = APIRouter()
 
@@ -39,6 +39,23 @@ def list_exceptions(
     return ExceptionListResponse(
         exceptions=[ExceptionOut.model_validate(e) for e in exceptions],
         total=total,
+    )
+
+
+@router.get("/exceptions/summary", response_model=SummaryOut)
+def get_summary(db: Session = Depends(get_db)):
+    total = db.query(ExceptionModel).count()
+    high = db.query(ExceptionModel).filter(ExceptionModel.severity == "high").count()
+    medium = db.query(ExceptionModel).filter(ExceptionModel.severity == "medium").count()
+    open_ = db.query(ExceptionModel).filter(ExceptionModel.status == "open").count()
+    ack = db.query(ExceptionModel).filter(ExceptionModel.status == "acknowledged").count()
+    resolved = db.query(ExceptionModel).filter(ExceptionModel.status == "resolved").count()
+    avg = db.query(func.avg(ExceptionModel.deficit_pct)).scalar() or 0.0
+
+    return SummaryOut(
+        total=total, high=high, medium=medium,
+        open=open_, acknowledged=ack, resolved=resolved,
+        avg_deficit_pct=round(float(avg), 2),
     )
 
 

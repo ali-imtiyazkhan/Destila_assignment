@@ -1,25 +1,29 @@
 import Header from "./components/Header"
 import ExceptionList from "./components/ExceptionList"
+import SummaryCards from "./components/SummaryCards"
+import { useDarkMode } from "./hooks/useDarkMode"
 import "./App.css"
 
 function App() {
+  const { dark, toggle } = useDarkMode()
+
   return (
     <div className="app">
-      <Header />
+      <Header dark={dark} onToggleDark={toggle} />
       <main className="main-content">
         <div className="container">
-          <h1 style={{ marginBottom: "0.5rem", fontSize: "var(--text-h3)" }}>
-            Exception Inbox
-          </h1>
-          <p
-            style={{
-              marginBottom: "2rem",
-              color: "var(--color-text-light)",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.5rem" }}>
+            <h1 style={{ fontSize: "var(--text-h3)" }}>
+              Exception Inbox
+            </h1>
+          </div>
+          <p style={{ marginBottom: "1.5rem", color: "var(--color-text-light)" }}>
             Plan-vs-actual deficit exceptions detected by the system.
           </p>
-          <ExceptionList />
+          <SummaryCards />
+          <div style={{ marginTop: "1.5rem" }}>
+            <ExceptionList />
+          </div>
         </div>
       </main>
       <footer className="site-footer">

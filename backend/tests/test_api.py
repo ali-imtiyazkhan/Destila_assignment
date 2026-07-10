@@ -159,6 +159,19 @@ def test_pagination_limit_over_max_returns_422(client):
     assert resp.status_code == 422
 
 
+def test_summary_endpoint(client):
+    resp = client.get("/exceptions/summary")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 3
+    assert data["high"] == 1
+    assert data["medium"] == 2
+    assert data["open"] == 2
+    assert data["acknowledged"] == 1
+    assert data["resolved"] == 0
+    assert data["avg_deficit_pct"] > 0
+
+
 def test_exception_fields(client):
     resp = client.get("/exceptions/1")
     data = resp.json()

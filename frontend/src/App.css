@@ -49,6 +49,24 @@
   gap: 1rem;
 }
 
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4xl);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-primary);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -175,6 +193,10 @@
   background: #f0efed;
 }
 
+[data-theme="dark"] .day-header:hover {
+  background: #1a1a1a;
+}
+
 .day-header .chevron {
   font-size: 0.75rem;
   transition: transform 0.2s;
@@ -223,6 +245,10 @@
 .exception-card.selected {
   background: #fff5ed;
   border-left: 3px solid var(--color-primary);
+}
+
+[data-theme="dark"] .exception-card.selected {
+  background: #1a0f08;
 }
 
 .exception-info {
@@ -481,6 +507,34 @@
   text-align: center;
   padding: 4rem;
   color: var(--color-text-light);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.summary-card {
+  padding: 1rem;
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-light);
+}
+
+.summary-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-light);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: var(--text-h4);
+  font-weight: 700;
+  font-family: var(--font-secondary);
 }
 
 .load-more-wrapper {

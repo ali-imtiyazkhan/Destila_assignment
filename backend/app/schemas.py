@@ -44,3 +44,13 @@ class ExceptionPatch(BaseModel):
 class ExceptionListResponse(BaseModel):
     exceptions: list[ExceptionOut]
     total: int
+
+
+class SummaryOut(BaseModel):
+    total: int
+    high: int
+    medium: int
+    open: int
+    acknowledged: int
+    resolved: int
+    avg_deficit_pct: float

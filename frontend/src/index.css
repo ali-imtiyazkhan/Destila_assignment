@@ -55,6 +55,18 @@ body {
   --container-pad: clamp(1rem, 5vw, 2rem);
 }
 
+[data-theme="dark"] {
+  --color-body: #0a0a0a;
+  --color-light: #141414;
+  --color-text: #f0f0f0;
+  --color-text-dark: #ffffff;
+  --color-text-light: #a0a8b3;
+  --color-border: #2a2a2a;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-secondary);
   font-weight: 700;
