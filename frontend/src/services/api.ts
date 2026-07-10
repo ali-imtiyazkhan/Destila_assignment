@@ -5,10 +5,14 @@ const BASE = ""
 export async function fetchExceptions(params: {
   product_code?: string
   severity?: string
+  offset?: number
+  limit?: number
 }): Promise<ExceptionListResponse> {
   const qs = new URLSearchParams()
   if (params.product_code) qs.set("product_code", params.product_code)
   if (params.severity) qs.set("severity", params.severity)
+  if (params.offset !== undefined) qs.set("offset", String(params.offset))
+  if (params.limit !== undefined) qs.set("limit", String(params.limit))
   const res = await fetch(`${BASE}/exceptions?${qs}`)
   if (!res.ok) throw new Error(`Failed to fetch exceptions: ${res.status}`)
   return res.json()

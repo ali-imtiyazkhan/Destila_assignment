@@ -483,6 +483,16 @@
   color: var(--color-text-light);
 }
 
+.load-more-wrapper {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.load-more-btn {
+  min-width: 220px;
+  justify-content: center;
+}
+
 .site-footer {
   background: var(--color-dark);
   color: #a0a8b3;

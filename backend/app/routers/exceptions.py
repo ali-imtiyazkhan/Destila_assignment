@@ -15,6 +15,8 @@ router = APIRouter()
 def list_exceptions(
     product_code: Optional[str] = Query(None),
     severity: Optional[str] = Query(None),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     query = db.query(ExceptionModel)
@@ -29,6 +31,8 @@ def list_exceptions(
     exceptions = (
         query
         .order_by(desc(ExceptionModel.date), desc(ExceptionModel.deficit_pct))
+        .offset(offset)
+        .limit(limit)
         .all()
     )
 

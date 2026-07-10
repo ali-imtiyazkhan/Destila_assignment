@@ -20,12 +20,14 @@ export default function ExceptionList() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const {
     exceptions,
+    total,
     products,
     loading,
+    hasMore,
     filterProduct,
     filterSeverity,
-    setFilterProduct,
-    setFilterSeverity,
+    handleFilterChange,
+    loadMore,
     handleStatusChange,
   } = useExceptions()
 
@@ -39,7 +41,7 @@ export default function ExceptionList() {
           <select
             className="filter-select"
             value={filterProduct}
-            onChange={(e) => setFilterProduct(e.target.value)}
+            onChange={(e) => handleFilterChange("product", e.target.value)}
           >
             <option value="">All</option>
             {products.map((p) => (
@@ -55,7 +57,7 @@ export default function ExceptionList() {
           <select
             className="filter-select"
             value={filterSeverity}
-            onChange={(e) => setFilterSeverity(e.target.value)}
+            onChange={(e) => handleFilterChange("severity", e.target.value)}
           >
             <option value="">All</option>
             <option value="high">High</option>
@@ -64,12 +66,12 @@ export default function ExceptionList() {
         </div>
 
         <div className="filter-count">
-          <strong>{exceptions.length}</strong> exception
-          {exceptions.length !== 1 ? "s" : ""}
+          <strong>{total}</strong> exception
+          {total !== 1 ? "s" : ""}
         </div>
       </div>
 
-      {loading ? (
+      {loading && exceptions.length === 0 ? (
         <div className="loading">Loading exceptions...</div>
       ) : exceptions.length === 0 ? (
         <div className="empty-state">
@@ -77,15 +79,29 @@ export default function ExceptionList() {
           <p>Try changing your filters.</p>
         </div>
       ) : (
-        groups.map(([date, excs]) => (
-          <ExceptionDayGroup
-            key={date}
-            date={date}
-            exceptions={excs}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        ))
+        <>
+          {groups.map(([date, excs]) => (
+            <ExceptionDayGroup
+              key={date}
+              date={date}
+              exceptions={excs}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          ))}
+
+          {hasMore && (
+            <div className="load-more-wrapper">
+              <button
+                className="btn btn-outline load-more-btn"
+                onClick={loadMore}
+                disabled={loading}
+              >
+                {loading ? "Loading..." : `Load more (${exceptions.length} of ${total})`}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {selectedId && (

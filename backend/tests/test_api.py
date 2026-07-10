@@ -123,6 +123,42 @@ def test_list_products(client):
     assert "FG-002" in data["products"]
 
 
+def test_pagination_offset(client):
+    resp = client.get("/exceptions?offset=0&limit=1")
+    data = resp.json()
+    assert len(data["exceptions"]) == 1
+    assert data["total"] == 3
+    first = data["exceptions"][0]["id"]
+
+    resp = client.get("/exceptions?offset=1&limit=1")
+    data = resp.json()
+    assert len(data["exceptions"]) == 1
+    assert data["exceptions"][0]["id"] != first
+
+
+def test_pagination_default_limit_50(client):
+    resp = client.get("/exceptions")
+    data = resp.json()
+    assert len(data["exceptions"]) == 3
+    assert data["total"] == 3
+
+
+def test_pagination_limit_exceeds_total(client):
+    resp = client.get("/exceptions?offset=0&limit=200")
+    data = resp.json()
+    assert len(data["exceptions"]) == 3
+
+
+def test_pagination_negative_offset_returns_422(client):
+    resp = client.get("/exceptions?offset=-1")
+    assert resp.status_code == 422
+
+
+def test_pagination_limit_over_max_returns_422(client):
+    resp = client.get("/exceptions?limit=201")
+    assert resp.status_code == 422
+
+
 def test_exception_fields(client):
     resp = client.get("/exceptions/1")
     data = resp.json()
