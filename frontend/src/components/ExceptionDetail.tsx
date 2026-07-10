@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react"
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid,
+} from "recharts"
 import type { ExceptionDetail as ExceptionDetailType } from "../types"
 import { fetchExceptionDetail, updateExceptionStatus } from "../services/api"
 import SeverityBadge from "./SeverityBadge"
@@ -43,8 +46,11 @@ export default function ExceptionDetail({
 
   if (!detail) return null
 
-  const deficitClass =
-    detail.deficit_pct > 0 ? "negative" : "positive"
+  const chartData = detail.trend.map((p) => ({
+    date: p.date.slice(5),
+    Planned: p.planned_units,
+    Actual: p.units_produced,
+  }))
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -67,7 +73,7 @@ export default function ExceptionDetail({
           </div>
           <div className="stat-card">
             <div className="stat-label">Deficit</div>
-            <div className={`stat-value ${deficitClass}`}>
+            <div className="stat-value negative">
               {detail.deficit_pct}%
             </div>
           </div>
@@ -77,13 +83,6 @@ export default function ExceptionDetail({
               <SeverityBadge severity={detail.severity} />
             </div>
           </div>
-        </div>
-
-        <div className="detail-actions">
-          <SeverityBadge severity={detail.severity} />
-          <span className={`status-badge ${detail.status}`}>
-            {detail.status}
-          </span>
         </div>
 
         <div className="status-actions">
@@ -105,40 +104,26 @@ export default function ExceptionDetail({
 
         <div className="trend-section" style={{ marginTop: "2rem" }}>
           <h3>7-Day Trend</h3>
-          <table className="trend-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Planned</th>
-                <th>Actual</th>
-                <th>Deficit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {detail.trend.map((point) => {
-                const deficit = point.planned_units
-                  ? (
-                      ((point.planned_units - point.units_produced) /
-                        point.planned_units) *
-                      100
-                    ).toFixed(1)
-                  : "—"
-                const isNegative = parseFloat(deficit as string) > 0
-                return (
-                  <tr key={point.date}>
-                    <td>{point.date}</td>
-                    <td>{point.planned_units}</td>
-                    <td>{point.units_produced}</td>
-                    <td
-                      className={`deficit-cell ${isNegative ? "negative" : "positive"}`}
-                    >
-                      {deficit}%
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div style={{ width: "100%", height: 220 }}>
+            <ResponsiveContainer>
+              <BarChart data={chartData} barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
+                <YAxis tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--color-body)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-xl)",
+                    fontSize: 13,
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 13 }} />
+                <Bar dataKey="Planned" fill="#ff5a03" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Actual" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>

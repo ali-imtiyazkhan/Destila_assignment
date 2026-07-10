@@ -4,6 +4,21 @@ import { useExceptions } from "../hooks/useExceptions"
 import ExceptionDayGroup from "./ExceptionDayGroup"
 import ExceptionDetail from "./ExceptionDetail"
 
+function exportCSV(exceptions: ExceptionItem[]) {
+  const headers = ["ID", "Product Code", "Plant", "Date", "Planned Units", "Units Produced", "Deficit %", "Severity", "Status"]
+  const rows = exceptions.map((e) =>
+    [e.id, e.product_code, e.plant, e.date, e.planned_units, e.units_produced, e.deficit_pct, e.severity, e.status].join(",")
+  )
+  const csv = [headers.join(","), ...rows].join("\n")
+  const blob = new Blob([csv], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "exceptions.csv"
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function groupByDate(exceptions: ExceptionItem[]) {
   const map = new Map<string, ExceptionItem[]>()
   for (const exc of exceptions) {
@@ -69,6 +84,13 @@ export default function ExceptionList() {
           <strong>{total}</strong> exception
           {total !== 1 ? "s" : ""}
         </div>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => exportCSV(exceptions)}
+          disabled={exceptions.length === 0}
+        >
+          Export CSV
+        </button>
       </div>
 
       {loading && exceptions.length === 0 ? (
