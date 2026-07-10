@@ -5,12 +5,14 @@ const BASE = ""
 export async function fetchExceptions(params: {
   product_code?: string
   severity?: string
+  date?: string
   offset?: number
   limit?: number
 }): Promise<ExceptionListResponse> {
   const qs = new URLSearchParams()
   if (params.product_code) qs.set("product_code", params.product_code)
   if (params.severity) qs.set("severity", params.severity)
+  if (params.date) qs.set("date", params.date)
   if (params.offset !== undefined) qs.set("offset", String(params.offset))
   if (params.limit !== undefined) qs.set("limit", String(params.limit))
   const res = await fetch(`${BASE}/exceptions?${qs}`)
@@ -65,6 +67,13 @@ export async function fetchSummary(): Promise<SummaryData> {
   const res = await fetch(`${BASE}/exceptions/summary`)
   if (!res.ok) throw new Error(`Failed to fetch summary: ${res.status}`)
   return res.json()
+}
+
+export async function fetchDates(): Promise<string[]> {
+  const res = await fetch(`${BASE}/exceptions/dates`)
+  if (!res.ok) throw new Error(`Failed to fetch dates: ${res.status}`)
+  const data = await res.json()
+  return data.dates
 }
 
 export async function fetchProducts(): Promise<string[]> {

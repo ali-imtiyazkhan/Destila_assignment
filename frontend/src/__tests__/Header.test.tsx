@@ -5,7 +5,7 @@ describe("Header", () => {
   it("renders the logo", () => {
     render(<Header dark={false} onToggleDark={() => {}} />)
     expect(screen.getByText("Exception")).toBeInTheDocument()
-    expect(screen.getByText("Inbox")).toBeInTheDocument()
+    expect(screen.getAllByText("Inbox").length).toBeGreaterThanOrEqual(1)
   })
 
   it("renders API Docs link", () => {

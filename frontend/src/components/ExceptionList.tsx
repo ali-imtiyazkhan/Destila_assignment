@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import type { ExceptionItem } from "../types"
-import { useExceptions } from "../hooks/useExceptions"
+import type { useExceptions } from "../hooks/useExceptions"
 import { batchUpdateStatus } from "../services/api"
 import ExceptionDayGroup from "./ExceptionDayGroup"
 import ExceptionDetail from "./ExceptionDetail"
@@ -33,11 +33,12 @@ function groupByDate(exceptions: ExceptionItem[]) {
 }
 
 interface Props {
+  hook: ReturnType<typeof useExceptions>
   onToast?: (text: string, type?: "success" | "error") => void
   onDataChange?: () => void
 }
 
-export default function ExceptionList({ onToast, onDataChange }: Props) {
+export default function ExceptionList({ hook, onToast }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [batchLoading, setBatchLoading] = useState(false)
@@ -46,14 +47,16 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
     total,
     products,
     loading,
-    error,
-    hasMore,
+    page,
+    totalPages,
+    hasPrev,
+    hasNext,
     filterProduct,
     filterSeverity,
     handleFilterChange,
-    loadMore,
+    goToPage,
     handleStatusChange,
-  } = useExceptions()
+  } = hook
 
   const toggleSelect = useCallback((id: number) => {
     setSelectedIds((prev) => {
@@ -64,21 +67,17 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
     })
   }, [])
 
-  const handleBatchUpdate = async (status: "acknowledged" | "resolved") => {
+  const handleBatchResolve = async () => {
     if (selectedIds.size === 0) return
     setBatchLoading(true)
     const ids = Array.from(selectedIds)
     try {
-      await batchUpdateStatus(ids, status)
-      ids.forEach((id) => handleStatusChange(id, status))
+      await batchUpdateStatus(ids, "resolved")
+      ids.forEach((id) => handleStatusChange(id, "resolved"))
       setSelectedIds(new Set())
-      onDataChange?.()
-      onToast?.(
-        `${ids.length} exception${ids.length !== 1 ? "s" : ""} ${status}`,
-        "success"
-      )
+      onToast?.(`${ids.length} exception${ids.length !== 1 ? "s" : ""} resolved`, "success")
     } catch {
-      onToast?.(`Failed to ${status} exceptions`, "error")
+      onToast?.("Failed to resolve exceptions", "error")
     }
     setBatchLoading(false)
   }
@@ -89,9 +88,8 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
     <div>
       <div className="filters-bar">
         <div className="filter-group">
-          <label htmlFor="filter-product">Product</label>
+          <label>Product</label>
           <select
-            id="filter-product"
             className="filter-select"
             value={filterProduct}
             onChange={(e) => handleFilterChange("product", e.target.value)}
@@ -106,9 +104,8 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
         </div>
 
         <div className="filter-group">
-          <label htmlFor="filter-severity">Severity</label>
+          <label>Severity</label>
           <select
-            id="filter-severity"
             className="filter-select"
             value={filterSeverity}
             onChange={(e) => handleFilterChange("severity", e.target.value)}
@@ -136,18 +133,11 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
         <div className="batch-bar">
           <span className="batch-count">{selectedIds.size} selected</span>
           <button
-            className="btn btn-outline btn-sm"
-            onClick={() => handleBatchUpdate("acknowledged")}
-            disabled={batchLoading}
-          >
-            {batchLoading ? "Updating..." : "Acknowledge Selected"}
-          </button>
-          <button
             className="btn btn-primary btn-sm"
-            onClick={() => handleBatchUpdate("resolved")}
+            onClick={handleBatchResolve}
             disabled={batchLoading}
           >
-            {batchLoading ? "Updating..." : "Resolve Selected"}
+            {batchLoading ? "Resolving..." : "Resolve Selected"}
           </button>
           <button
             className="btn btn-outline btn-sm"
@@ -160,11 +150,6 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
 
       {loading && exceptions.length === 0 ? (
         <div className="loading">Loading exceptions...</div>
-      ) : error && exceptions.length === 0 ? (
-        <div className="empty-state">
-          <h3>Something went wrong</h3>
-          <p>{error}</p>
-        </div>
       ) : exceptions.length === 0 ? (
         <div className="empty-state">
           <h3>No exceptions found</h3>
@@ -187,17 +172,25 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
             />
           ))}
 
-          {hasMore && (
-            <div className="load-more-wrapper">
-              <button
-                className="btn btn-outline load-more-btn"
-                onClick={loadMore}
-                disabled={loading}
-              >
-                {loading ? "Loading..." : `Load more (${exceptions.length} of ${total})`}
-              </button>
-            </div>
-          )}
+          <div className="pagination-bar">
+            <button
+              className="btn btn-outline btn-sm"
+              disabled={!hasPrev || loading}
+              onClick={() => goToPage(page - 1)}
+            >
+              &larr; Previous
+            </button>
+            <span className="pagination-info">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              className="btn btn-outline btn-sm"
+              disabled={!hasNext || loading}
+              onClick={() => goToPage(page + 1)}
+            >
+              Next &rarr;
+            </button>
+          </div>
         </>
       )}
 
@@ -208,7 +201,6 @@ export default function ExceptionList({ onToast, onDataChange }: Props) {
           onStatusChange={(id, status) => {
             handleStatusChange(id, status)
             setSelectedIds(new Set())
-            onDataChange?.()
           }}
           onToast={onToast}
         />

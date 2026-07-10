@@ -15,6 +15,7 @@ router = APIRouter()
 def list_exceptions(
     product_code: Optional[str] = Query(None),
     severity: Optional[str] = Query(None),
+    date: Optional[str] = Query(None),
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
@@ -25,6 +26,8 @@ def list_exceptions(
         query = query.filter(ExceptionModel.product_code == product_code.upper())
     if severity:
         query = query.filter(ExceptionModel.severity == severity)
+    if date:
+        query = query.filter(ExceptionModel.date == date)
 
     total = query.count()
 
@@ -134,6 +137,12 @@ def update_exception_status(exception_id: int, body: ExceptionPatch, db: Session
     db.refresh(exc)
 
     return ExceptionOut.model_validate(exc)
+
+
+@router.get("/exceptions/dates")
+def list_dates(db: Session = Depends(get_db)):
+    results = db.query(ExceptionModel.date).distinct().order_by(ExceptionModel.date).all()
+    return {"dates": sorted(set(r[0] for r in results))}
 
 
 @router.get("/products")

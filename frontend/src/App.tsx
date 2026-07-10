@@ -2,10 +2,12 @@ import { useState } from "react"
 import Header from "./components/Header"
 import Hero from "./components/Hero"
 import ExceptionList from "./components/ExceptionList"
+import CalendarSidebar from "./components/CalendarSidebar"
 import SummaryCards from "./components/SummaryCards"
 import Footer from "./components/Footer"
 import Toast, { useToasts } from "./components/Toast"
 import { useDarkMode } from "./hooks/useDarkMode"
+import { useExceptions } from "./hooks/useExceptions"
 import "./App.css"
 
 function App() {
@@ -13,13 +15,20 @@ function App() {
   const { toasts, show } = useToasts()
   const [summaryKey, setSummaryKey] = useState(0)
 
+  const hook = useExceptions()
+
   return (
     <div className="app">
       <Header dark={dark} onToggleDark={toggle} />
       <Hero refreshKey={summaryKey} />
 
       <main className="main-content">
-        <div className="container">
+        <div className="container inbox-layout">
+          <CalendarSidebar
+            dates={hook.dates}
+            selectedDate={hook.filterDate}
+            onSelectDate={(date) => hook.handleFilterChange("date", date)}
+          />
           <section id="inbox" className="inbox-section">
             <div className="section-header">
               <div>
@@ -33,6 +42,7 @@ function App() {
 
             <SummaryCards refreshKey={summaryKey} />
             <ExceptionList
+              hook={hook}
               onToast={show}
               onDataChange={() => setSummaryKey((k) => k + 1)}
             />
