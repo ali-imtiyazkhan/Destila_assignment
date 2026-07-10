@@ -26,6 +26,19 @@ export async function fetchExceptionDetail(
   return res.json()
 }
 
+export async function batchUpdateStatus(
+  ids: number[],
+  status: string
+): Promise<{ updated: number }> {
+  const res = await fetch(`${BASE}/exceptions/batch`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids, status }),
+  })
+  if (!res.ok) throw new Error(`Failed to batch update: ${res.status}`)
+  return res.json()
+}
+
 export async function updateExceptionStatus(
   id: number,
   status: string

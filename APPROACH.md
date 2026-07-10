@@ -8,7 +8,7 @@
 4. **API** — FastAPI with 4 endpoints, filtering, sorting, status mutation
 5. **Frontend** — React inbox UI with day-by-day timeline, filters, detail panel, status updates
 6. **Docker** — multi-service setup with nginx proxy and one-command run
-7. **Tests** — 17 backend API tests (pytest) + 14 frontend component tests (vitest)
+7. **Tests** — 28 backend API tests (pytest) + 15 frontend component tests (vitest)
 
 ## Process Flow
 
@@ -45,6 +45,7 @@ actual_production.csv → raw_actual → clean_actual ─┘                    
 - **Seoptic-inspired design system**: orange primary, Inter fonts, pill badges, smooth transitions
 - Day-by-day timeline with collapsible groups, filters (product, severity), slide-out detail panel
 - Acknowledge/resolve buttons update UI instantly without full page reload
+- Recharts bar chart for 7-day plan-vs-actual trend in detail panel
 
 ## Docker
 
@@ -56,12 +57,10 @@ actual_production.csv → raw_actual → clean_actual ─┘                    
 
 - **SQLite** instead of Postgres — zero setup, sufficient for scope
 - **Single plant** assumption — data only contains PLANT-1
-- **No pagination** — dataset is small enough
-- **No chart library** — 7-day trend shown as a table rather than a chart
+- **No pagination UI for very large datasets** — load-more covers typical use; API supports offset/limit
 
 ## Next Steps
 
 - Add pagination for larger datasets
 - Support multiple plants dynamically
-- Add a chart library (e.g., Chart.js) for visual 7-day trend
-- Add dark mode support
+- Code-split Recharts to reduce bundle size

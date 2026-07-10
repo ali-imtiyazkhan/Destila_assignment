@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Exception as ExceptionModel, CleanPlan, CleanActual
-from app.schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse, SummaryOut
+from app.schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse, SummaryOut, BatchPatch
 
 router = APIRouter()
 
@@ -57,6 +57,21 @@ def get_summary(db: Session = Depends(get_db)):
         open=open_, acknowledged=ack, resolved=resolved,
         avg_deficit_pct=round(float(avg), 2),
     )
+
+
+@router.patch("/exceptions/batch")
+def batch_update(body: BatchPatch, db: Session = Depends(get_db)):
+    if not body.ids:
+        raise HTTPException(status_code=400, detail="At least one exception id is required")
+    if body.status not in ("acknowledged", "resolved"):
+        raise HTTPException(status_code=400, detail="Status must be 'acknowledged' or 'resolved'")
+
+    updated = db.query(ExceptionModel).filter(
+        ExceptionModel.id.in_(body.ids),
+        ExceptionModel.status != body.status,
+    ).update({"status": body.status}, synchronize_session=False)
+    db.commit()
+    return {"updated": updated}
 
 
 @router.get("/exceptions/{exception_id}", response_model=ExceptionDetail)

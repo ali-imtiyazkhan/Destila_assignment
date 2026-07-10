@@ -9,25 +9,33 @@ export function useExceptions() {
   const [total, setTotal] = useState(0)
   const [products, setProducts] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [offset, setOffset] = useState(0)
   const [filterProduct, setFilterProduct] = useState("")
   const [filterSeverity, setFilterSeverity] = useState("")
 
   const load = useCallback(async (currentOffset: number) => {
     setLoading(true)
-    const data = await fetchExceptions({
-      offset: currentOffset,
-      limit: PAGE_SIZE,
-      product_code: filterProduct || undefined,
-      severity: filterSeverity || undefined,
-    })
-    setTotal(data.total)
-    if (currentOffset === 0) {
-      setExceptions(data.exceptions)
-    } else {
-      setExceptions((prev) => [...prev, ...data.exceptions])
+    setError(null)
+    try {
+      const data = await fetchExceptions({
+        offset: currentOffset,
+        limit: PAGE_SIZE,
+        product_code: filterProduct || undefined,
+        severity: filterSeverity || undefined,
+      })
+      setTotal(data.total)
+      if (currentOffset === 0) {
+        setExceptions(data.exceptions)
+      } else {
+        setExceptions((prev) => [...prev, ...data.exceptions])
+      }
+    } catch {
+      setError("Failed to load exceptions")
+      if (currentOffset === 0) setExceptions([])
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [filterProduct, filterSeverity])
 
   useEffect(() => {
@@ -36,7 +44,9 @@ export function useExceptions() {
   }, [load])
 
   useEffect(() => {
-    fetchProducts().then(setProducts)
+    fetchProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]))
   }, [])
 
   const loadMore = () => {
@@ -52,7 +62,7 @@ export function useExceptions() {
 
   const handleStatusChange = (id: number, status: string) => {
     setExceptions((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: status as any } : e))
+      prev.map((e) => (e.id === id ? { ...e, status: status as ExceptionItem["status"] } : e))
     )
   }
 
@@ -63,6 +73,7 @@ export function useExceptions() {
     total,
     products,
     loading,
+    error,
     hasMore,
     filterProduct,
     filterSeverity,

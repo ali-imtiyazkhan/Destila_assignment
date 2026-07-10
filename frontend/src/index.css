@@ -13,6 +13,7 @@ body {
   background: var(--color-body);
   line-height: 1.625;
   -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
 }
 
 :root {

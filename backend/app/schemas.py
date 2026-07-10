@@ -46,6 +46,11 @@ class ExceptionListResponse(BaseModel):
     total: int
 
 
+class BatchPatch(BaseModel):
+    ids: list[int]
+    status: str
+
+
 class SummaryOut(BaseModel):
     total: int
     high: int

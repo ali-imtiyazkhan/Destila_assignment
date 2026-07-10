@@ -184,3 +184,35 @@ def test_exception_fields(client):
     assert "deficit_pct" in data
     assert "severity" in data
     assert "status" in data
+
+
+def test_batch_update_to_resolved(client):
+    resp = client.patch("/exceptions/batch", json={"ids": [1, 2], "status": "resolved"})
+    assert resp.status_code == 200
+    assert resp.json()["updated"] == 2
+
+    for exc_id in [1, 2]:
+        resp = client.get(f"/exceptions/{exc_id}")
+        assert resp.json()["status"] == "resolved"
+
+
+def test_batch_update_to_acknowledged(client):
+    resp = client.patch("/exceptions/batch", json={"ids": [2], "status": "acknowledged"})
+    assert resp.status_code == 200
+    assert resp.json()["updated"] == 1
+
+
+def test_batch_update_skips_already_set_status(client):
+    client.patch("/exceptions/1", json={"status": "acknowledged"})
+    resp = client.patch("/exceptions/batch", json={"ids": [1, 2], "status": "acknowledged"})
+    assert resp.json()["updated"] == 1
+
+
+def test_batch_update_empty_ids_returns_400(client):
+    resp = client.patch("/exceptions/batch", json={"ids": [], "status": "resolved"})
+    assert resp.status_code == 400
+
+
+def test_batch_update_invalid_status_returns_400(client):
+    resp = client.patch("/exceptions/batch", json={"ids": [1], "status": "invalid"})
+    assert resp.status_code == 400

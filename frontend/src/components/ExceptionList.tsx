@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import type { ExceptionItem } from "../types"
 import { useExceptions } from "../hooks/useExceptions"
+import { batchUpdateStatus } from "../services/api"
 import ExceptionDayGroup from "./ExceptionDayGroup"
 import ExceptionDetail from "./ExceptionDetail"
 
@@ -33,15 +34,19 @@ function groupByDate(exceptions: ExceptionItem[]) {
 
 interface Props {
   onToast?: (text: string, type?: "success" | "error") => void
+  onDataChange?: () => void
 }
 
-export default function ExceptionList({ onToast }: Props) {
+export default function ExceptionList({ onToast, onDataChange }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [batchLoading, setBatchLoading] = useState(false)
   const {
     exceptions,
     total,
     products,
     loading,
+    error,
     hasMore,
     filterProduct,
     filterSeverity,
@@ -50,14 +55,43 @@ export default function ExceptionList({ onToast }: Props) {
     handleStatusChange,
   } = useExceptions()
 
+  const toggleSelect = useCallback((id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const handleBatchUpdate = async (status: "acknowledged" | "resolved") => {
+    if (selectedIds.size === 0) return
+    setBatchLoading(true)
+    const ids = Array.from(selectedIds)
+    try {
+      await batchUpdateStatus(ids, status)
+      ids.forEach((id) => handleStatusChange(id, status))
+      setSelectedIds(new Set())
+      onDataChange?.()
+      onToast?.(
+        `${ids.length} exception${ids.length !== 1 ? "s" : ""} ${status}`,
+        "success"
+      )
+    } catch {
+      onToast?.(`Failed to ${status} exceptions`, "error")
+    }
+    setBatchLoading(false)
+  }
+
   const groups = groupByDate(exceptions)
 
   return (
     <div>
       <div className="filters-bar">
         <div className="filter-group">
-          <label>Product</label>
+          <label htmlFor="filter-product">Product</label>
           <select
+            id="filter-product"
             className="filter-select"
             value={filterProduct}
             onChange={(e) => handleFilterChange("product", e.target.value)}
@@ -72,8 +106,9 @@ export default function ExceptionList({ onToast }: Props) {
         </div>
 
         <div className="filter-group">
-          <label>Severity</label>
+          <label htmlFor="filter-severity">Severity</label>
           <select
+            id="filter-severity"
             className="filter-select"
             value={filterSeverity}
             onChange={(e) => handleFilterChange("severity", e.target.value)}
@@ -97,8 +132,39 @@ export default function ExceptionList({ onToast }: Props) {
         </button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="batch-bar">
+          <span className="batch-count">{selectedIds.size} selected</span>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => handleBatchUpdate("acknowledged")}
+            disabled={batchLoading}
+          >
+            {batchLoading ? "Updating..." : "Acknowledge Selected"}
+          </button>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => handleBatchUpdate("resolved")}
+            disabled={batchLoading}
+          >
+            {batchLoading ? "Updating..." : "Resolve Selected"}
+          </button>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {loading && exceptions.length === 0 ? (
         <div className="loading">Loading exceptions...</div>
+      ) : error && exceptions.length === 0 ? (
+        <div className="empty-state">
+          <h3>Something went wrong</h3>
+          <p>{error}</p>
+        </div>
       ) : exceptions.length === 0 ? (
         <div className="empty-state">
           <h3>No exceptions found</h3>
@@ -111,8 +177,13 @@ export default function ExceptionList({ onToast }: Props) {
               key={date}
               date={date}
               exceptions={excs}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
               selectedId={selectedId}
-              onSelect={setSelectedId}
+              onSelect={(id) => {
+                setSelectedId(id)
+                setSelectedIds(new Set())
+              }}
             />
           ))}
 
@@ -134,7 +205,11 @@ export default function ExceptionList({ onToast }: Props) {
         <ExceptionDetail
           id={selectedId}
           onClose={() => setSelectedId(null)}
-          onStatusChange={handleStatusChange}
+          onStatusChange={(id, status) => {
+            handleStatusChange(id, status)
+            setSelectedIds(new Set())
+            onDataChange?.()
+          }}
           onToast={onToast}
         />
       )}

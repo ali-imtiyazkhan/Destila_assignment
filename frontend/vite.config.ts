@@ -7,6 +7,8 @@ export default defineConfig({
     proxy: {
       "/exceptions": "http://localhost:8000",
       "/products": "http://localhost:8000",
+      "/docs": "http://localhost:8000",
+      "/openapi.json": "http://localhost:8000",
     },
   },
   test: {

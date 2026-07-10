@@ -2,33 +2,61 @@ import { useEffect, useState } from "react"
 import type { SummaryData } from "../services/api"
 import { fetchSummary } from "../services/api"
 
-export default function SummaryCards() {
+interface Props {
+  refreshKey?: number
+}
+
+const CARD_CONFIG = [
+  { key: "total" as const, label: "Total", icon: "📊", color: "var(--color-text)" },
+  { key: "high" as const, label: "High", icon: "🔴", color: "#dc2626" },
+  { key: "medium" as const, label: "Medium", icon: "🟡", color: "#d97706" },
+  { key: "open" as const, label: "Open", icon: "📬", color: "#2563eb" },
+  { key: "avg_deficit_pct" as const, label: "Avg Deficit", icon: "📉", color: "var(--color-text)", suffix: "%" },
+]
+
+export default function SummaryCards({ refreshKey = 0 }: Props) {
   const [data, setData] = useState<SummaryData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchSummary().then(setData)
-  }, [])
+    setLoading(true)
+    fetchSummary()
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false))
+  }, [refreshKey])
+
+  if (loading && !data) {
+    return (
+      <div className="summary-grid">
+        {CARD_CONFIG.map((card) => (
+          <div key={card.key} className="summary-card summary-card-skeleton">
+            <div className="summary-icon">{card.icon}</div>
+            <div className="summary-label">{card.label}</div>
+            <div className="summary-value">—</div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   if (!data) return null
 
-  const cards = [
-    { label: "Total", value: data.total, color: "var(--color-text)" },
-    { label: "High", value: data.high, color: "#dc2626" },
-    { label: "Medium", value: data.medium, color: "#d97706" },
-    { label: "Open", value: data.open, color: "#2563eb" },
-    { label: "Avg Deficit", value: `${data.avg_deficit_pct}%`, color: "var(--color-text)" },
-  ]
-
   return (
     <div className="summary-grid">
-      {cards.map((card) => (
-        <div key={card.label} className="summary-card">
-          <div className="summary-label">{card.label}</div>
-          <div className="summary-value" style={{ color: card.color }}>
-            {card.value}
+      {CARD_CONFIG.map((card) => {
+        const raw = data[card.key]
+        const value = card.suffix ? `${raw}${card.suffix}` : raw
+        return (
+          <div key={card.key} className="summary-card">
+            <div className="summary-icon">{card.icon}</div>
+            <div className="summary-label">{card.label}</div>
+            <div className="summary-value" style={{ color: card.color }}>
+              {value}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

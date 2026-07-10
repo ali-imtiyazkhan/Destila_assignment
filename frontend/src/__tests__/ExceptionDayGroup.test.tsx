@@ -33,6 +33,8 @@ describe("ExceptionDayGroup", () => {
       <ExceptionDayGroup
         date="2017-01-05"
         exceptions={exceptions}
+        selectedIds={new Set()}
+        onToggleSelect={() => {}}
         selectedId={null}
         onSelect={() => {}}
       />
@@ -45,6 +47,8 @@ describe("ExceptionDayGroup", () => {
       <ExceptionDayGroup
         date="2017-01-05"
         exceptions={exceptions}
+        selectedIds={new Set()}
+        onToggleSelect={() => {}}
         selectedId={null}
         onSelect={() => {}}
       />
@@ -57,6 +61,8 @@ describe("ExceptionDayGroup", () => {
       <ExceptionDayGroup
         date="2017-01-05"
         exceptions={[exceptions[0]]}
+        selectedIds={new Set()}
+        onToggleSelect={() => {}}
         selectedId={null}
         onSelect={() => {}}
       />
@@ -69,6 +75,8 @@ describe("ExceptionDayGroup", () => {
       <ExceptionDayGroup
         date="2017-01-05"
         exceptions={exceptions}
+        selectedIds={new Set()}
+        onToggleSelect={() => {}}
         selectedId={null}
         onSelect={() => {}}
       />

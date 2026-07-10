@@ -21,20 +21,36 @@ export default function ExceptionDetail({
 }: Props) {
   const [detail, setDetail] = useState<ExceptionDetailType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     setLoading(true)
-    fetchExceptionDetail(id).then((data) => {
-      setDetail(data)
-      setLoading(false)
-    })
+    setError(null)
+    fetchExceptionDetail(id)
+      .then((data) => {
+        setDetail(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        setError("Failed to load exception details")
+        setLoading(false)
+      })
   }, [id])
 
   const handleStatus = async (status: string) => {
-    await updateExceptionStatus(id, status)
-    onStatusChange(id, status)
-    setDetail((prev) => (prev ? { ...prev, status: status as any } : prev))
-    onToast?.(`${detail?.product_code} marked as ${status}`, "success")
+    if (!detail || updating) return
+    setUpdating(true)
+    try {
+      await updateExceptionStatus(id, status)
+      onStatusChange(id, status)
+      setDetail((prev) => (prev ? { ...prev, status: status as ExceptionDetailType["status"] } : prev))
+      onToast?.(`${detail.product_code} marked as ${status}`, "success")
+    } catch {
+      onToast?.("Failed to update status", "error")
+    } finally {
+      setUpdating(false)
+    }
   }
 
   if (loading) {
@@ -47,7 +63,19 @@ export default function ExceptionDetail({
     )
   }
 
-  if (!detail) return null
+  if (error || !detail) {
+    return (
+      <div className="detail-overlay" onClick={onClose}>
+        <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
+          <button className="close-btn" onClick={onClose}>✕</button>
+          <div className="empty-state" style={{ marginTop: "2rem" }}>
+            <h3>Could not load details</h3>
+            <p>{error ?? "Exception not found"}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const chartData = detail.trend.map((p) => ({
     date: p.date.slice(5),
@@ -91,14 +119,14 @@ export default function ExceptionDetail({
         <div className="status-actions">
           <button
             className={`status-btn ${detail.status === "acknowledged" ? "active" : ""}`}
-            disabled={detail.status === "acknowledged"}
+            disabled={detail.status === "acknowledged" || updating}
             onClick={() => handleStatus("acknowledged")}
           >
             Acknowledge
           </button>
           <button
             className={`status-btn ${detail.status === "resolved" ? "active" : ""}`}
-            disabled={detail.status === "resolved"}
+            disabled={detail.status === "resolved" || updating}
             onClick={() => handleStatus("resolved")}
           >
             Resolve
@@ -107,26 +135,32 @@ export default function ExceptionDetail({
 
         <div className="trend-section" style={{ marginTop: "2rem" }}>
           <h3>7-Day Trend</h3>
-          <div style={{ width: "100%", height: 220 }}>
-            <ResponsiveContainer>
-              <BarChart data={chartData} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--color-body)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-xl)",
-                    fontSize: 13,
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 13 }} />
-                <Bar dataKey="Planned" fill="#ff5a03" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Actual" fill="#22c55e" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {detail.trend.length === 0 ? (
+            <p style={{ color: "var(--color-text-light)", fontSize: "var(--text-sm)" }}>
+              No prior production data available.
+            </p>
+          ) : (
+            <div style={{ width: "100%", height: 220 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData} barCategoryGap="20%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
+                  <YAxis tick={{ fontSize: 12 }} stroke="var(--color-text-light)" />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--color-body)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-xl)",
+                      fontSize: 13,
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 13 }} />
+                  <Bar dataKey="Planned" fill="#ff5a03" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Actual" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
     </div>

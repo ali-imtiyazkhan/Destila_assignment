@@ -19,7 +19,7 @@ describe("ExceptionCard", () => {
     render(
       <ExceptionCard
         exception={mockException}
-        selected={false}
+        detailSelected={false}
         onClick={() => {}}
       />
     )
@@ -30,7 +30,7 @@ describe("ExceptionCard", () => {
     render(
       <ExceptionCard
         exception={mockException}
-        selected={false}
+        detailSelected={false}
         onClick={() => {}}
       />
     )
@@ -41,7 +41,7 @@ describe("ExceptionCard", () => {
     render(
       <ExceptionCard
         exception={mockException}
-        selected={false}
+        detailSelected={false}
         onClick={() => {}}
       />
     )
@@ -52,7 +52,7 @@ describe("ExceptionCard", () => {
     render(
       <ExceptionCard
         exception={mockException}
-        selected={false}
+        detailSelected={false}
         onClick={() => {}}
       />
     )
@@ -64,7 +64,7 @@ describe("ExceptionCard", () => {
     render(
       <ExceptionCard
         exception={mockException}
-        selected={false}
+        detailSelected={false}
         onClick={onClick}
       />
     )
@@ -72,14 +72,29 @@ describe("ExceptionCard", () => {
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
-  it("applies selected class when selected", () => {
+  it("applies selected class when detailSelected", () => {
     const { container } = render(
       <ExceptionCard
         exception={mockException}
-        selected={true}
+        detailSelected={true}
         onClick={() => {}}
       />
     )
     expect(container.firstChild).toHaveClass("selected")
+  })
+
+  it("checkbox reflects checked prop independently of detailSelected", () => {
+    render(
+      <ExceptionCard
+        exception={mockException}
+        detailSelected={false}
+        checked={true}
+        showCheckbox
+        onToggleSelect={() => {}}
+        onClick={() => {}}
+      />
+    )
+    const checkbox = screen.getByRole("checkbox") as HTMLInputElement
+    expect(checkbox.checked).toBe(true)
   })
 })
