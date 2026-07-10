@@ -1,32 +1,17 @@
-from datetime import date
 from typing import Optional
 
-from fastapi import FastAPI, Depends, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, asc
 
-from database import get_db, engine, Base
-from models import Exception as ExceptionModel, CleanPlan, CleanActual
-from schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse
+from app.database import get_db
+from app.models import Exception as ExceptionModel, CleanPlan, CleanActual
+from app.schemas import ExceptionOut, ExceptionDetail, TrendPoint, ExceptionPatch, ExceptionListResponse
 
-app = FastAPI(title="Mini Exception Inbox API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
-
-
-@app.get("/exceptions", response_model=ExceptionListResponse)
+@router.get("/exceptions", response_model=ExceptionListResponse)
 def list_exceptions(
     product_code: Optional[str] = Query(None),
     severity: Optional[str] = Query(None),
@@ -53,7 +38,7 @@ def list_exceptions(
     )
 
 
-@app.get("/exceptions/{exception_id}", response_model=ExceptionDetail)
+@router.get("/exceptions/{exception_id}", response_model=ExceptionDetail)
 def get_exception(exception_id: int, db: Session = Depends(get_db)):
     exc = db.query(ExceptionModel).filter(ExceptionModel.id == exception_id).first()
     if not exc:
@@ -99,7 +84,7 @@ def get_exception(exception_id: int, db: Session = Depends(get_db)):
     )
 
 
-@app.patch("/exceptions/{exception_id}", response_model=ExceptionOut)
+@router.patch("/exceptions/{exception_id}", response_model=ExceptionOut)
 def update_exception_status(exception_id: int, body: ExceptionPatch, db: Session = Depends(get_db)):
     if body.status not in ("acknowledged", "resolved"):
         raise HTTPException(status_code=400, detail="Status must be 'acknowledged' or 'resolved'")
@@ -115,7 +100,7 @@ def update_exception_status(exception_id: int, body: ExceptionPatch, db: Session
     return ExceptionOut.model_validate(exc)
 
 
-@app.get("/products")
+@router.get("/products")
 def list_products(db: Session = Depends(get_db)):
     results = db.query(ExceptionModel.product_code).distinct().all()
     return {"products": sorted(set(r[0] for r in results))}

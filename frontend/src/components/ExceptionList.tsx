@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react"
+import { useState } from "react"
 import type { ExceptionItem } from "../types"
-import { fetchExceptions, fetchProducts } from "../api"
+import { useExceptions } from "../hooks/useExceptions"
 import ExceptionDayGroup from "./ExceptionDayGroup"
 import ExceptionDetail from "./ExceptionDetail"
 
@@ -17,36 +17,17 @@ function groupByDate(exceptions: ExceptionItem[]) {
 }
 
 export default function ExceptionList() {
-  const [exceptions, setExceptions] = useState<ExceptionItem[]>([])
-  const [products, setProducts] = useState<string[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [filterProduct, setFilterProduct] = useState("")
-  const [filterSeverity, setFilterSeverity] = useState("")
-  const [loading, setLoading] = useState(true)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    const data = await fetchExceptions({
-      product_code: filterProduct || undefined,
-      severity: filterSeverity || undefined,
-    })
-    setExceptions(data.exceptions)
-    setLoading(false)
-  }, [filterProduct, filterSeverity])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  useEffect(() => {
-    fetchProducts().then(setProducts)
-  }, [])
-
-  const handleStatusChange = (id: number, status: string) => {
-    setExceptions((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: status as any } : e))
-    )
-  }
+  const {
+    exceptions,
+    products,
+    loading,
+    filterProduct,
+    filterSeverity,
+    setFilterProduct,
+    setFilterSeverity,
+    handleStatusChange,
+  } = useExceptions()
 
   const groups = groupByDate(exceptions)
 

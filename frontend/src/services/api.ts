@@ -1,4 +1,4 @@
-import type { ExceptionListResponse, ExceptionDetail } from "./types"
+import type { ExceptionListResponse, ExceptionDetail } from "../types"
 
 const BASE = ""
 
@@ -10,6 +10,7 @@ export async function fetchExceptions(params: {
   if (params.product_code) qs.set("product_code", params.product_code)
   if (params.severity) qs.set("severity", params.severity)
   const res = await fetch(`${BASE}/exceptions?${qs}`)
+  if (!res.ok) throw new Error(`Failed to fetch exceptions: ${res.status}`)
   return res.json()
 }
 
@@ -17,6 +18,7 @@ export async function fetchExceptionDetail(
   id: number
 ): Promise<ExceptionDetail> {
   const res = await fetch(`${BASE}/exceptions/${id}`)
+  if (!res.ok) throw new Error(`Failed to fetch exception detail: ${res.status}`)
   return res.json()
 }
 
@@ -24,15 +26,17 @@ export async function updateExceptionStatus(
   id: number,
   status: string
 ): Promise<void> {
-  await fetch(`${BASE}/exceptions/${id}`, {
+  const res = await fetch(`${BASE}/exceptions/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   })
+  if (!res.ok) throw new Error(`Failed to update status: ${res.status}`)
 }
 
 export async function fetchProducts(): Promise<string[]> {
   const res = await fetch(`${BASE}/products`)
+  if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`)
   const data = await res.json()
   return data.products
 }

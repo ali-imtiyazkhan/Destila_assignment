@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, Date, Text
-from database import Base
+from app.database import Base
 
 
 class RawPlan(Base):

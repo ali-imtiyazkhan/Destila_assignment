@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import type { ExceptionDetail as ExceptionDetailType } from "../types"
-import { fetchExceptionDetail, updateExceptionStatus } from "../api"
+import { fetchExceptionDetail, updateExceptionStatus } from "../services/api"
 import SeverityBadge from "./SeverityBadge"
 
 interface Props {

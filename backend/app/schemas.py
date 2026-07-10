@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -7,9 +7,7 @@ class TrendPoint(BaseModel):
     date: date
     planned_units: float
     units_produced: float
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExceptionDetail(BaseModel):
@@ -23,9 +21,7 @@ class ExceptionDetail(BaseModel):
     severity: str
     status: str
     trend: list[TrendPoint]
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExceptionOut(BaseModel):
@@ -38,9 +34,7 @@ class ExceptionOut(BaseModel):
     deficit_pct: float
     severity: str
     status: str
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExceptionPatch(BaseModel):

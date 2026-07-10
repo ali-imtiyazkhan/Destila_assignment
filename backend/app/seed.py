@@ -1,14 +1,10 @@
 import csv
 import os
-import re
-from datetime import datetime
 from dateutil import parser as dateparser
-from sqlalchemy.orm import Session
-from database import SessionLocal, engine, Base
-from models import RawPlan, RawActual, CleanPlan, CleanActual, Exception
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CSV_DIR = os.path.join(BASE_DIR, "data")
+from app.database import SessionLocal, engine, Base
+from app.models import RawPlan, RawActual, CleanPlan, CleanActual, Exception
+from app.config import DATA_DIR
 
 
 def load_raw_csv(filepath: str):
@@ -57,12 +53,12 @@ def seed():
         db.close()
         return
 
-    raw_plan_rows = load_raw_csv(f"{CSV_DIR}/production_plan.csv")
+    raw_plan_rows = load_raw_csv(f"{DATA_DIR}/production_plan.csv")
     for r in raw_plan_rows:
         db.add(RawPlan(**r))
     db.commit()
 
-    raw_actual_rows = load_raw_csv(f"{CSV_DIR}/actual_production.csv")
+    raw_actual_rows = load_raw_csv(f"{DATA_DIR}/actual_production.csv")
     for r in raw_actual_rows:
         db.add(RawActual(**r))
     db.commit()

@@ -5,13 +5,15 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from datetime import date
 
-from database import Base
-from models import CleanPlan, CleanActual, Exception as ExceptionModel
-from main import app, get_db
+from app.database import Base
+from app.models import CleanPlan, CleanActual, Exception as ExceptionModel
+from app.main import app
+from app.database import get_db
 
 TEST_DB_URL = "sqlite:///:memory:"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 def override_get_db():
     db = TestingSessionLocal()
@@ -19,6 +21,7 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
 
 app.dependency_overrides[get_db] = override_get_db
 
