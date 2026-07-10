@@ -6,16 +6,17 @@
 2. **Schema design** — raw/clean separation per assignment spec, materialized exceptions table
 3. **Ingestion pipeline** — CSV → raw tables → clean tables (with validation) → exception detection
 4. **API** — FastAPI with 4 endpoints, filtering, sorting, status mutation
-5. **Frontend** — not yet implemented
+5. **Frontend** — React inbox UI with day-by-day timeline, filters, detail panel, status updates
+6. **Docker** — multi-service setup with nginx proxy and one-command run
+7. **Tests** — 17 backend API tests (pytest) + 14 frontend component tests (vitest)
 
 ## Process Flow
 
 ```
 production_plan.csv ──→ raw_plan ──→ clean_plan ──┐
-                                                  ├──→ exceptions table
-actual_production.csv → raw_actual → clean_actual ┘
-                                                  ↓
-                                           FastAPI endpoints
+                                                    ├──→ exceptions table ──→ FastAPI ──→ React UI
+actual_production.csv → raw_actual → clean_actual ─┘                              ↑
+                                                                           nginx proxy (Docker)
 ```
 
 ## Data Decisions
@@ -38,16 +39,29 @@ actual_production.csv → raw_actual → clean_actual ┘
 - Pydantic v2 for request/response validation
 - 7-day trend excludes the exception date (shows preceding days only)
 
+## Frontend Design
+
+- **React + TypeScript + Vite** for fast development
+- **Seoptic-inspired design system**: orange primary, Inter fonts, pill badges, smooth transitions
+- Day-by-day timeline with collapsible groups, filters (product, severity), slide-out detail panel
+- Acknowledge/resolve buttons update UI instantly without full page reload
+
+## Docker
+
+- Multi-stage `Dockerfile` for frontend (Node build + nginx serve)
+- `docker-compose.yml` with backend and frontend services
+- Nginx proxies API requests to the backend container
+
 ## Tradeoffs & Shortcuts
 
 - **SQLite** instead of Postgres — zero setup, sufficient for scope
 - **Single plant** assumption — data only contains PLANT-1
 - **No pagination** — dataset is small enough
-- **Frontend not implemented** — time constraints
+- **No chart library** — 7-day trend shown as a table rather than a chart
 
 ## Next Steps
 
-- Build a React inbox UI with day-by-day timeline, filters, and status updates
-- Add Docker setup for one-command run
 - Add pagination for larger datasets
 - Support multiple plants dynamically
+- Add a chart library (e.g., Chart.js) for visual 7-day trend
+- Add dark mode support
