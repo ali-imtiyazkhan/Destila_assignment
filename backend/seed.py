@@ -8,7 +8,7 @@ from database import SessionLocal, engine, Base
 from models import RawPlan, RawActual, CleanPlan, CleanActual, Exception
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CSV_DIR = os.path.join(BASE_DIR, "candidate_pack", "data")
+CSV_DIR = os.path.join(BASE_DIR, "data")
 
 
 def load_raw_csv(filepath: str):

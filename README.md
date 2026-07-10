@@ -36,11 +36,19 @@ Ingests production plan and actual production CSVs, detects deficit exceptions (
 
 ## Running
 
+### Without Docker
+
 ```bash
 cd backend
 pip install -r requirements.txt
 python seed.py          # ingest CSVs and detect exceptions
 uvicorn main:app --reload  # serves at http://localhost:8000
+```
+
+### With Docker (one command)
+
+```bash
+docker-compose up --build
 ```
 
 API docs available at `http://localhost:8000/docs`.
