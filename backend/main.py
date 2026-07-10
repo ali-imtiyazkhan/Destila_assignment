@@ -43,7 +43,7 @@ def list_exceptions(
 
     exceptions = (
         query
-        .order_by(desc(ExceptionModel.date), asc(ExceptionModel.deficit_pct))
+        .order_by(desc(ExceptionModel.date), desc(ExceptionModel.deficit_pct))
         .all()
     )
 
@@ -68,7 +68,7 @@ def get_exception(exception_id: int, db: Session = Depends(get_db)):
         )
         .filter(
             CleanPlan.product_code == exc.product_code,
-            CleanPlan.date <= exc.date,
+            CleanPlan.date < exc.date,
         )
         .order_by(desc(CleanPlan.date))
         .limit(7)

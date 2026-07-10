@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 from datetime import datetime
 from dateutil import parser as dateparser
@@ -6,7 +7,8 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 from models import RawPlan, RawActual, CleanPlan, CleanActual, Exception
 
-CSV_DIR = r"C:\Users\my\Downloads\Destila_Intern\candidate_pack\data"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CSV_DIR = os.path.join(BASE_DIR, "candidate_pack", "data")
 
 
 def load_raw_csv(filepath: str):
