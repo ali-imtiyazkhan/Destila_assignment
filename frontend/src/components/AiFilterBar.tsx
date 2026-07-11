@@ -1,9 +1,8 @@
 import { useState, useRef } from "react"
-import { nlSearch } from "../services/api"
-import type { ExceptionItem } from "../types"
+import { nlSearch, type NLSearchResult } from "../services/api"
 
 interface Props {
-  onResult: (exceptions: ExceptionItem[], total: number, query: string) => void
+  onResult: (result: NLSearchResult) => void
   onToast?: (text: string, type?: "success" | "error") => void
 }
 
@@ -19,7 +18,7 @@ export default function AiFilterBar({ onResult, onToast }: Props) {
     setLoading(true)
     try {
       const data = await nlSearch(trimmed)
-      onResult(data.exceptions, data.total, trimmed)
+      onResult(data)
       onToast?.(`Found ${data.total} exceptions`, "success")
     } catch {
       onToast?.("Search failed", "error")
