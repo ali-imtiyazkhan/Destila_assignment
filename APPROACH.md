@@ -8,7 +8,7 @@
 4. **API** — FastAPI with 4 endpoints, filtering, sorting, status mutation
 5. **Frontend** — React inbox UI with day-by-day timeline, filters, detail panel, status updates
 6. **Docker** — multi-service setup with nginx proxy and one-command run
-7. **Tests** — 28 backend API tests (pytest) + 15 frontend component tests (vitest)
+7. **Tests** — 29 backend API tests (pytest) + 17 frontend component tests (vitest)
 
 ## Process Flow
 

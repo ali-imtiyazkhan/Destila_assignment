@@ -85,10 +85,10 @@ npm run dev                 # http://localhost:5173 (proxies API to :8000)
 ### Tests
 
 ```bash
-# Backend (23 tests)
+# Backend (29 tests)
 cd backend && python -m pytest tests/ -v
 
-# Frontend (15 tests)
+# Frontend (17 tests)
 cd frontend && npm test
 ```
 

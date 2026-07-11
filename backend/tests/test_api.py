@@ -216,3 +216,9 @@ def test_batch_update_empty_ids_returns_400(client):
 def test_batch_update_invalid_status_returns_400(client):
     resp = client.patch("/exceptions/batch", json={"ids": [1], "status": "invalid"})
     assert resp.status_code == 400
+
+
+def test_health_endpoint(client):
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "ok"}

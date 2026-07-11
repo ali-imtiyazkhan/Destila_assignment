@@ -89,8 +89,10 @@ def seed():
     print(f"Inserted {len(cleaned_actuals)} clean actual rows")
 
     plan_map = {}
+    plant_map = {}
     for p in cleaned_plans:
         plan_map[(p.date, p.product_code)] = p.planned_units
+        plant_map[(p.date, p.product_code)] = p.plant
 
     actual_map = {}
     for a in cleaned_actuals:
@@ -108,7 +110,7 @@ def seed():
             exceptions.append(
                 Exception(
                     product_code=product_code,
-                    plant="PLANT-1",
+                    plant=plant_map.get((date_key, product_code), "PLANT-1"),
                     date=date_key,
                     planned_units=planned,
                     units_produced=actual,
