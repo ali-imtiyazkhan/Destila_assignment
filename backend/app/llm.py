@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 import httpx
 
@@ -50,24 +49,17 @@ def _build_system_prompt(tool: str) -> str:
     return prompts.get(tool, prompts["analyze"])
 
 
-async def llm_chat(messages: list[dict], tool: str) -> str:
-    system = {"role": "system", "content": _build_system_prompt(tool)}
-    full = [system] + messages
-
-    if LLM_PROVIDER == "mock":
-        return _mock_chat(messages)
-
+async def _call_openai(messages: list[dict]) -> str:
     headers = {
         "Authorization": f"Bearer {LLM_API_KEY}",
         "Content-Type": "application/json",
     }
     body = {
         "model": LLM_MODEL,
-        "messages": full,
+        "messages": messages,
         "temperature": 0.3,
         "max_tokens": 500,
     }
-
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
             f"{LLM_BASE_URL}/chat/completions",
@@ -77,3 +69,50 @@ async def llm_chat(messages: list[dict], tool: str) -> str:
         resp.raise_for_status()
         data = resp.json()
         return data["choices"][0]["message"]["content"]
+
+
+async def _call_gemini(messages: list[dict]) -> str:
+    system_msg = next((m for m in messages if m["role"] == "system"), None)
+    user_msgs = [m for m in messages if m["role"] != "system"]
+
+    contents = []
+    for m in user_msgs:
+        contents.append({
+            "role": "user",
+            "parts": [{"text": m["content"]}],
+        })
+
+    body = {
+        "contents": contents,
+        "generationConfig": {
+            "temperature": 0.3,
+            "maxOutputTokens": 500,
+        },
+    }
+    if system_msg:
+        body["systemInstruction"] = {
+            "parts": [{"text": system_msg["content"]}],
+        }
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{LLM_MODEL}:generateContent?key={LLM_API_KEY}",
+            headers={"Content-Type": "application/json"},
+            json=body,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+
+async def llm_chat(messages: list[dict], tool: str) -> str:
+    system = {"role": "system", "content": _build_system_prompt(tool)}
+    full = [system] + messages
+
+    if LLM_PROVIDER == "mock":
+        return _mock_chat(messages)
+
+    if LLM_PROVIDER == "gemini":
+        return await _call_gemini(full)
+
+    return await _call_openai(full)

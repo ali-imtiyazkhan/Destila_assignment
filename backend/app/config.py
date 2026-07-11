@@ -7,5 +7,5 @@ SQLALCHEMY_DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'exception_inbox.d
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "mock")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.0-flash")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
