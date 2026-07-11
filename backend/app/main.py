@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
 from app.routers.exceptions import router as exceptions_router
+from app.routers.ai import router as ai_router
 
 
 @asynccontextmanager
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(exceptions_router)
+app.include_router(ai_router)
 
 
 @app.get("/health")

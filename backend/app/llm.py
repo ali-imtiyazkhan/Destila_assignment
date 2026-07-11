@@ -1,0 +1,79 @@
+import json
+from typing import Optional
+
+import httpx
+
+from app.config import LLM_PROVIDER, LLM_API_KEY, LLM_MODEL, LLM_BASE_URL
+
+
+def _mock_chat(messages: list[dict]) -> str:
+    last = messages[-1]["content"].lower()
+    if "analyze" in last:
+        return (
+            "This product shows a declining production trend over the past several days. "
+            "The deficit on the exception date follows lower output in preceding days, "
+            "suggesting a sustained issue rather than a one-off dip. "
+            "Possible root causes: machine downtime, raw material shortage, or staffing gaps. "
+            "Recommendation: check maintenance logs and material inventory for this product line."
+        )
+    if "summary" in last:
+        return (
+            "Today's exception overview: there are several open items requiring attention, "
+            "with a mix of high and medium severity. The average deficit indicates moderate "
+            "underperformance. High-severity items should be prioritized for resolution. "
+            "Overall, production is mostly on track but a few product lines need investigation."
+        )
+    if "translate" in last:
+        return json.dumps({})
+    return "No analysis available."
+
+
+def _build_system_prompt(tool: str) -> str:
+    prompts = {
+        "analyze": (
+            "You are a manufacturing analyst. Given an exception with product code, deficit percentage, "
+            "severity, and its 7-day production trend, explain the likely root cause and recommend an action. "
+            "Keep it concise (3-5 sentences)."
+        ),
+        "summary": (
+            "You are a manufacturing analyst. Given summary statistics about production exceptions "
+            "(total count, high/medium severity counts, open/acknowledged/resolved statuses, average deficit), "
+            "write a brief 2-3 sentence daily summary for a plant manager."
+        ),
+        "translate": (
+            "You are a query translator. Convert the user's natural language request into structured filter parameters. "
+            "Respond with ONLY valid JSON matching this schema: "
+            '{"product_code": string or null, "severity": "high" or "medium" or null, "date": string or null}. '
+            "Use null for unspecified fields. Do not include any other text."
+        ),
+    }
+    return prompts.get(tool, prompts["analyze"])
+
+
+async def llm_chat(messages: list[dict], tool: str) -> str:
+    system = {"role": "system", "content": _build_system_prompt(tool)}
+    full = [system] + messages
+
+    if LLM_PROVIDER == "mock":
+        return _mock_chat(messages)
+
+    headers = {
+        "Authorization": f"Bearer {LLM_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    body = {
+        "model": LLM_MODEL,
+        "messages": full,
+        "temperature": 0.3,
+        "max_tokens": 500,
+    }
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            f"{LLM_BASE_URL}/chat/completions",
+            headers=headers,
+            json=body,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"]

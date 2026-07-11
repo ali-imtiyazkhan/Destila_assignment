@@ -6,8 +6,11 @@ import CalendarSidebar from "./components/CalendarSidebar"
 import SummaryCards from "./components/SummaryCards"
 import Footer from "./components/Footer"
 import Toast, { useToasts } from "./components/Toast"
+import AiSummary from "./components/AiSummary"
+import AiFilterBar from "./components/AiFilterBar"
 import { useDarkMode } from "./hooks/useDarkMode"
 import { useExceptions } from "./hooks/useExceptions"
+import type { NLSearchResult } from "./services/api"
 import "./App.css"
 
 function App() {
@@ -17,12 +20,23 @@ function App() {
 
   const hook = useExceptions()
 
+  const handleNLSearch = (result: NLSearchResult) => {
+    const { params } = result
+    hook.applyFilters({
+      product_code: params.product_code || "",
+      severity: params.severity || "",
+      date: params.date || "",
+    })
+  }
+
   return (
     <div className="app">
       <Header dark={dark} onToggleDark={toggle} />
       <Hero refreshKey={summaryKey} />
 
       <main className="main-content">
+        <AiSummary refreshKey={summaryKey} />
+
         <div className="container inbox-layout">
           <CalendarSidebar
             dates={hook.dates}
@@ -40,6 +54,7 @@ function App() {
               </div>
             </div>
 
+            <AiFilterBar onResult={handleNLSearch} onToast={show} />
             <SummaryCards refreshKey={summaryKey} />
             <ExceptionList
               hook={hook}

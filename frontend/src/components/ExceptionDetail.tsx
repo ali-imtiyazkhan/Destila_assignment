@@ -5,6 +5,7 @@ import {
 import type { ExceptionDetail as ExceptionDetailType } from "../types"
 import { fetchExceptionDetail, updateExceptionStatus } from "../services/api"
 import SeverityBadge from "./SeverityBadge"
+import AiInsight from "./AiInsight"
 
 interface Props {
   id: number
@@ -131,6 +132,10 @@ export default function ExceptionDetail({
           >
             Resolve
           </button>
+        </div>
+
+        <div className="detail-ai">
+          <AiInsight exceptionId={detail.id} />
         </div>
 
         <div className="trend-section" style={{ marginTop: "2rem" }}>

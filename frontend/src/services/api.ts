@@ -1,4 +1,4 @@
-import type { ExceptionListResponse, ExceptionDetail } from "../types"
+import type { ExceptionListResponse, ExceptionDetail, ExceptionItem } from "../types"
 
 const BASE = ""
 
@@ -81,4 +81,33 @@ export async function fetchProducts(): Promise<string[]> {
   if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`)
   const data = await res.json()
   return data.products
+}
+
+export async function fetchAiSummary(): Promise<{ summary: string }> {
+  const res = await fetch(`${BASE}/exceptions/summary/ai`)
+  if (!res.ok) throw new Error(`Failed to fetch AI summary: ${res.status}`)
+  return res.json()
+}
+
+export async function fetchAiInsight(id: number): Promise<{ insight: string }> {
+  const res = await fetch(`${BASE}/exceptions/${id}/analyze`)
+  if (!res.ok) throw new Error(`Failed to fetch AI insight: ${res.status}`)
+  return res.json()
+}
+
+export interface NLSearchResult {
+  query: string
+  params: Record<string, string | null>
+  exceptions: ExceptionItem[]
+  total: number
+}
+
+export async function nlSearch(query: string): Promise<NLSearchResult> {
+  const res = await fetch(`${BASE}/exceptions/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  })
+  if (!res.ok) throw new Error(`NL search failed: ${res.status}`)
+  return res.json()
 }

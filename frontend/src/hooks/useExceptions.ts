@@ -73,6 +73,12 @@ export function useExceptions() {
     )
   }
 
+  const applyFilters = (filters: { product_code?: string; severity?: string; date?: string }) => {
+    if (filters.product_code !== undefined) setFilterProduct(filters.product_code)
+    if (filters.severity !== undefined) setFilterSeverity(filters.severity)
+    if (filters.date !== undefined) setFilterDate(filters.date)
+  }
+
   return {
     exceptions,
     total,
@@ -90,5 +96,6 @@ export function useExceptions() {
     handleFilterChange,
     goToPage,
     handleStatusChange,
+    applyFilters,
   }
 }

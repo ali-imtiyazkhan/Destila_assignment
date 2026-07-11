@@ -1490,6 +1490,126 @@
   color: #4b5563;
 }
 
+/* ── AI Components ── */
+
+.ai-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  max-width: var(--container-max);
+  margin: 0 auto 1.5rem;
+  padding: 0 var(--container-pad);
+  width: 100%;
+}
+
+.ai-summary-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ai-summary-body {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  background: var(--color-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+}
+
+.ai-summary-loading {
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.ai-filter-bar {
+  margin-bottom: 1.5rem;
+}
+
+.ai-filter-input-wrap {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--color-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: 0.375rem 0.5rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ai-filter-input-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.ai-filter-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  padding: 0 0.25rem;
+}
+
+.ai-filter-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  outline: none;
+  padding: 0.375rem 0;
+}
+
+.ai-filter-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  margin-top: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.ai-filter-hint em {
+  color: var(--color-primary);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.ai-insight {
+  margin-top: 1.25rem;
+}
+
+.ai-insight-btn {
+  font-size: var(--text-xs);
+}
+
+.ai-insight-error {
+  font-size: var(--text-xs);
+  color: #dc2626;
+  margin-top: 0.5rem;
+}
+
+.ai-insight-panel {
+  margin-top: 0.75rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  background: var(--color-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease;
+}
+
+.detail-ai {
+  margin-top: 1.25rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 768px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
