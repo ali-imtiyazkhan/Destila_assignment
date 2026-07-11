@@ -2,6 +2,8 @@
 
 Ingests production plan and actual production CSVs, detects deficit exceptions (actual < 90% of planned), and serves them through a REST API with a React inbox UI.
 
+![App Screenshot](frontend/public/image.png)
+
 ## Architecture
 
 ```
