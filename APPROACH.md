@@ -64,3 +64,5 @@ actual_production.csv → raw_actual → clean_actual ─┘                    
 - Add pagination for larger datasets
 - Support multiple plants dynamically
 - Code-split Recharts to reduce bundle size
+- Connect real LLM provider (OpenAI / Gemini) for production-grade AI insights
+- Add streaming responses for AI analysis to reduce perceived latency

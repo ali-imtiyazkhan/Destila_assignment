@@ -16,6 +16,8 @@
 
 5. *"Add full-stack tests: backend API tests and frontend component tests."* → AI generated 17 pytest tests covering all API endpoints (list, filter, detail, patch, products) and 14 vitest tests covering frontend components (Header, SeverityBadge, ExceptionCard, ExceptionDayGroup).
 
+6. *"Add AI features: root cause analysis, daily summary, natural language search with Gemini support."* → AI created the LLM provider abstraction (mock/OpenAI/Gemini), AI router with 3 endpoints, and frontend components (AiInsight, AiSummary, AiFilterBar). I configured the Gemini provider to use its native API format.
+
 ## Where AI Was Wrong & How I Caught It
 
 1. **Sort order**: The AI initially sorted exceptions with `deficit_pct ASC` (ascending), which puts the smallest deficit first. The assignment spec says "within the same day, sort worst deficit first" — meaning largest deficit first. I caught this by re-reading the spec while testing and corrected it to `DESC`.
@@ -26,5 +28,5 @@
 
 ## AI vs Hand-Written Split
 
-- AI-generated (minor edits): ~80%
-- Heavily edited / hand-written: ~20%
+- AI-generated (minor edits): ~75%
+- Heavily edited / hand-written: ~25%
