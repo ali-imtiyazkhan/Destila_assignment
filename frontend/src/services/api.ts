@@ -1,6 +1,6 @@
 import type { ExceptionListResponse, ExceptionDetail, ExceptionItem } from "../types"
 
-const BASE = ""
+const BASE = import.meta.env.VITE_API_URL ?? ""
 
 export async function fetchExceptions(params: {
   product_code?: string

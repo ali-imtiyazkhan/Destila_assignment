@@ -82,6 +82,30 @@ npm install
 npm run dev                 # http://localhost:5173 (proxies API to :8000)
 ```
 
+## Deployment
+
+### Backend → Render
+
+1. Push repo to GitHub and connect it to [Render](https://render.com).
+2. Create a **Web Service**, select the repo.
+3. Set:
+   - **Root Directory:** *leave blank*
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `cd backend && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add any env vars (`LLM_PROVIDER`, `LLM_API_KEY`, etc.) in the Render dashboard.
+5. Deploy. Copy the URL (e.g. `https://your-app.onrender.com`).
+
+### Frontend → Vercel
+
+1. Push repo to GitHub and connect it to [Vercel](https://vercel.com).
+2. Vercel auto-detects Vite. Set:
+   - **Root Directory:** `frontend`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. Add an environment variable:
+   - `VITE_API_URL` = your Render backend URL (e.g. `https://your-app.onrender.com`)
+4. Deploy.
+
 ### Tests
 
 ```bash
