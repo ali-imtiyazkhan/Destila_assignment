@@ -4,6 +4,10 @@ Ingests production plan and actual production CSVs, detects deficit exceptions (
 
 ![App Screenshot](frontend/public/image.png)
 
+## Presentation
+
+> 📹 **Loom Video Walkthrough:** https://www.loom.com/share/d7a1f20de2a54f4896359ebff3b25708
+
 ## Architecture
 
 ```
